@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+        imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.backend.service.port }}
+        env:
+{{- range .Values.backend.env }}
+        - name: {{ .name }}
+{{- if .value }}
+          value: {{ .value | quote }}
+{{- end }}
+{{- if .valueFrom }}
+          valueFrom:
+{{ toYaml .valueFrom | indent 12 }}
+{{- end }}
+{{- end }}
+        resources:
+{{ toYaml .Values.backend.resources | indent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.backend.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: {{ .Values.backend.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5

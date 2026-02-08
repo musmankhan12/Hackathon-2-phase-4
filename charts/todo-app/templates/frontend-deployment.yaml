@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+        imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.frontend.service.port }}
+        env:
+{{- range .Values.frontend.env }}
+        - name: {{ .name }}
+{{- if .value }}
+          value: {{ .value | quote }}
+{{- end }}
+{{- if .valueFrom }}
+          valueFrom:
+{{ toYaml .valueFrom | indent 12 }}
+{{- end }}
+{{- end }}
+        resources:
+{{ toYaml .Values.frontend.resources | indent 10 }}
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.frontend.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.frontend.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5

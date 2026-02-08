@@ -1,0 +1,62 @@
+# Default values for todo-app
+# Phase IV: Containerization + Kubernetes Deployment
+
+# Global configurations
+global:
+  namespace: todo-app
+
+# -----------------------------
+# Frontend Configuration
+# -----------------------------
+frontend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: todo-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 3000
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  env:
+    - name: BACKEND_URL
+      value: "http://backend-service:8000"
+
+# -----------------------------
+# Backend Configuration
+# -----------------------------
+backend:
+  enabled: true
+  replicaCount: 1
+
+  image:
+    repository: todo-backend
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 8000
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  env:
+  - name: DATABASE_URL
+    value: "postgresql://neondb_owner:npg_cQqgN21neoJU@ep-lingering-boat-ah4x1tsd-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"

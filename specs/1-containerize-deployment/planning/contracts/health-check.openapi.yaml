@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: Evolution of Todo - Health Check API
+  version: 1.0.0
+  description: Health check endpoints for the containerized services
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the service
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-01-29T10:00:00Z"
+                  service:
+                    type: string
+                    example: "backend-api"
+                  version:
+                    type: string
+                    example: "1.0.0"
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [unhealthy]
+                    example: unhealthy
+                  error:
+                    type: string
+                    example: "Database connection failed"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-01-29T10:00:00Z"
+
+  /api/health:
+    get:
+      summary: Frontend health check endpoint
+      description: Returns the health status of the frontend service
+      responses:
+        '200':
+          description: Frontend service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy]
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2026-01-29T10:00:00Z"
+                  service:
+                    type: string
+                    example: "frontend"
+                  version:
+                    type: string
+                    example: "1.0.0"

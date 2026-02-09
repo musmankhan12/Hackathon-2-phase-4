@@ -1,7 +1,7 @@
 """
 Database connection and session management for SQLModel.
 
-Optimized for Neon PostgreSQL with sync driver for stability.
+Supports both PostgreSQL and SQLite databases.
 """
 
 import os
@@ -19,7 +19,19 @@ DATABASE_URL = os.getenv(
     "postgresql://user:password@ep-xyz.region.neon.tech/dbname?sslmode=require"
 )
 
-# Create sync engine for SQLModel (optimized for Neon PostgreSQL)
+# Determine if we're using SQLite or PostgreSQL
+if DATABASE_URL.startswith("sqlite"):
+    # SQLite configuration
+    connect_args = {"check_same_thread": False}
+else:
+    # PostgreSQL configuration
+    connect_args = {
+        "sslmode": "require",
+        "connect_timeout": 10,
+        # Removed statement_timeout options as they're not supported by Neon
+    }
+
+# Create sync engine for SQLModel
 sync_engine = create_engine(
     DATABASE_URL,
     echo=False,
@@ -27,11 +39,7 @@ sync_engine = create_engine(
     max_overflow=10,
     pool_pre_ping=True,
     pool_recycle=300,  # Reduced recycle time for Neon
-    connect_args={
-        "sslmode": "require",
-        "connect_timeout": 10,
-        # Removed statement_timeout options as they're not supported by Neon
-    }
+    connect_args=connect_args
 )
 
 
